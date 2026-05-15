@@ -1,0 +1,50 @@
+[
+  {
+    "id": "INV-1001",
+    "customerName": "ABC Logistics",
+    "customerWhatsapp": "+923001234567",
+    "amount": 25000,
+    "dueDate": "2026-05-01T00:00:00.000Z",
+    "status": "pending",
+    "warehouseBlocked": true,
+    "lateFeeWaived": false,
+    "createdAt": "2026-04-15T10:00:00.000Z",
+    "_demoScenario": "exact_match — payment 25000 approves release"
+  },
+  {
+    "id": "INV-1002",
+    "customerName": "Karachi Freight Co",
+    "customerWhatsapp": "+923009876543",
+    "amount": 25000,
+    "dueDate": "2026-05-10T00:00:00.000Z",
+    "status": "pending",
+    "warehouseBlocked": true,
+    "lateFeeWaived": false,
+    "createdAt": "2026-04-20T08:30:00.000Z",
+    "_demoScenario": "underpayment — demo text uses 20000 (5000 short)"
+  },
+  {
+    "id": "INV-1003",
+    "customerName": "Port City Traders",
+    "customerWhatsapp": "+923001112223",
+    "amount": 25000,
+    "dueDate": "2026-05-12T00:00:00.000Z",
+    "status": "pending",
+    "warehouseBlocked": true,
+    "lateFeeWaived": true,
+    "createdAt": "2026-04-22T14:00:00.000Z",
+    "_demoScenario": "overpayment — demo text uses 30000 (credit note)"
+  },
+  {
+    "id": "INV-1004",
+    "customerName": "Lahore Cold Chain",
+    "customerWhatsapp": "+923004445556",
+    "amount": 18000,
+    "dueDate": "2026-05-18T00:00:00.000Z",
+    "status": "pending",
+    "warehouseBlocked": true,
+    "lateFeeWaived": false,
+    "createdAt": "2026-05-01T09:00:00.000Z",
+    "_demoScenario": "optional — alternate exact match amount"
+  }
+]

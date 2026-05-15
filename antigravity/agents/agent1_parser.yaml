@@ -1,0 +1,13 @@
+name: parser_agent
+description: Extracts invoice reference, amount, and date from an image or unstructured text using Gemini Vision.
+model: gemini-2.5-flash-001
+inputs:
+  - image_url
+  - raw_text
+outputs:
+  - extractedAmount
+  - extractedReference
+  - extractedConfidence
+system_prompt: |
+  You are an expert data extraction agent. Extract the invoice amount and reference number from the provided image or text.
+  Return JSON with the keys extractedAmount, extractedReference, and extractedConfidence.

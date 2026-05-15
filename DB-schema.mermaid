@@ -1,0 +1,50 @@
+%% Raast-Flow Firestore model — see Backend-Schema.md and docs/API.md
+erDiagram
+    INVOICES {
+        string id PK "Document ID e.g. INV-1001"
+        string customerName "ABC Logistics"
+        string customerWhatsapp "+923001234567"
+        number amount "25000 PKR"
+        timestamp dueDate "ISO 8601"
+        string status "pending | reconciled | disputed"
+        boolean warehouseBlocked "true = blocked"
+        boolean lateFeeWaived "true = no late fee"
+        timestamp createdAt "Creation time"
+    }
+
+    WORKFLOW_EXECUTIONS {
+        string id PK "Auto-generated e.g. wf_20260515_001"
+        string inputType "image | text | manual"
+        string inputPreview "First 100 chars"
+        number extractedAmount "Parsed amount"
+        string extractedReference "Invoice ID"
+        number extractedConfidence "0.0 - 1.0"
+        boolean invoiceFound "true if invoice exists"
+        string matchType "exact | overpayment | underpayment | no_invoice"
+        string recommendedAction "approve | credit_note | dispute"
+        string finalAction "Same as recommended"
+        string actionId "RO-xxx or D-xxx"
+        object beforeState "Snapshot {invoiceStatus, warehouseBlocked}"
+        object afterState "Snapshot after simulation"
+        array simulationLogs "List of strings"
+        string whatsappPreview "Mock notification text"
+        string userAgent "Browser info (optional)"
+        timestamp createdAt "Completion timestamp"
+    }
+
+    AGENT_TRACES {
+        string executionId FK "→ WORKFLOW_EXECUTIONS.id"
+        string agentName "parser | lookup | matcher | decision | simulator"
+        number order "1 to 5"
+        string status "running | completed | failed"
+        timestamp startTime "Agent start"
+        timestamp endTime "Agent end"
+        object input "Sanitised input"
+        object output "Sanitised output"
+        string reasoning "Human-readable explanation"
+        array toolCalls "List of {toolName, params}"
+        string error "Optional error message"
+    }
+
+    WORKFLOW_EXECUTIONS ||--o{ AGENT_TRACES : "has many"
+    WORKFLOW_EXECUTIONS }o--|| INVOICES : "references (logical)"
