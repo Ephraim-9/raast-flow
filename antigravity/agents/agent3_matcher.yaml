@@ -1,0 +1,7 @@
+name: matcher_agent
+description: Compares payment amount against expected invoice amount to determine matching status (exact, overpayment, underpayment).
+inputs:
+  - paymentAmount
+  - invoiceAmount
+outputs:
+  - matchType

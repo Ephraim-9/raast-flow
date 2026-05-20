@@ -62,27 +62,24 @@ Each step: `writeTrace(running)` → `agent.run(ctx)` → `writeTrace(completed|
 
 ---
 
-## Current gap (why Phase 3.5 exists)
+## Completed Refactoring (Phase 3.5)
 
-The repo **works end-to-end** but:
-
-- All five agents are **inline** inside `runPipeline()` in `antigravity-client.ts`
-- Parser uses **hardcoded** amounts/references when not manual
-- Camera sends **mock JSON text**, not image bytes to the API
-- `lib/agents/` and `workflow-types.ts` **do not exist yet**
+Phase 3.5 has been successfully implemented and verified:
+- **Decoupled Architecture**: All 5 agents are decoupled into separate classes under `lib/agents/` and extend the `Agent` interface defined in `lib/workflow-types.ts`.
+- **Slim Orchestrator**: The pipeline in `lib/antigravity-client.ts` strictly coordinates loop runs, manages failure states, and persists traces in Firestore.
+- **Real Gemini Integration**: The parser agent uses Vertex AI to extract data from unstructured inputs (image/text) with an elegant fallback in `MOCK_MODE`.
+- **FormData & Binary Uploads**: Client-side camera scans transmit native multipart binary file arrays directly to the server.
+- **Robust Schema Validation**: Integrated Zod validation into `POST /api/process` to validate all formats of `'manual'`, `'image'`, and `'whatsapp'`/`'text'` inputs.
+- **Sync Declarative Specs**: Full YAML models for Agent 1-5 created in `antigravity/agents/` to serve as hackathon-ready judge logs.
 
 ---
 
-## Implementation order (execute sequentially)
+## Active & Next Steps
 
-1. Wire real image upload to `POST /api/process`
-2. Add `lib/workflow-types.ts`
-3. Implement `lib/agents/parser.ts` with Gemini (respect `MOCK_MODE`)
-4. Extract lookup, matcher, decision, simulator into `lib/agents/`
-5. Refactor orchestrator to delegate only
-6. Failed-trace handling
-7. Regression: four demo scenarios + manual path
-8. Export logs + demo video (Phase 9)
+1. **Test Scripts (`scripts/test-workflow.js`)**: Automate end-to-end integration and regression tests for judge review.
+2. **Export Logs (`scripts/export-agent-logs.js`)**: Extract traces from Firestore as JSON artifacts under `antigravity/logs/` for direct submission.
+3. **Phase 7: PWA Polish**: Complete standalone mobile standalone installation setup, add toast notifications for failed uploads, and enhance styling micro-interactions.
+4. **Phase 9: Production Deployment**: Push to production via Vercel, populate environmental secrets, and confirm live end-to-end runs.
 
 ---
 

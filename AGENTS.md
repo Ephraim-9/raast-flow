@@ -200,19 +200,23 @@ Stored at: `workflow_executions/{workflowId}/traces/step_{order}`.
 
 - Next.js app, `(mobile)` routes, API routes
 - `POST /api/process`, status/result/history endpoints
-- Orchestrator in `lib/antigravity-client.ts` with inline 5-step pipeline
+- Orchestrator in `lib/antigravity-client.ts` with loop over agents and full trace persistence
 - Firestore + `MOCK_MODE` mock DB
 - Process page polling; result/history screens
-- YAML workflow + agent stubs under `antigravity/`
+- YAML workflow + Agent 1–5 declarative specifications under `antigravity/`
+- **Phase 3.5 Completed**:
+  - Image upload to backend via `multipart/form-data` and binary extraction
+  - Real parser agent utilizing Gemini Vision / text APIs in `lib/agents/parser.ts`
+  - Fully decoupled agent architecture (`lib/agents/*.ts`) with structured `WorkflowContext`
+  - Slim orchestrator performing loop sequence and proper failed-step state transitions
+  - Robust Zod validation schema on the `POST /api/process` endpoint
+  - Comprehensive per-agent failure trace logging and workflow status updates
 
 ### Next (priority order)
 
-1. **Image upload to backend** — `POST /api/process` must read `multipart` `file` → `imageBase64` on workflow input; camera page must send FormData or base64, not mock JSON text only.
-2. **Real parser** — Gemini in `lib/agents/parser.ts`; remove hardcoded INV-1001 / 25000 in orchestrator.
-3. **Extract agents** — Move each step from `antigravity-client.ts` into `lib/agents/*.ts` + `lib/workflow-types.ts`.
-4. **Orchestrator slim-down** — `antigravity-client.ts` only: start workflow, loop agents, traces, persistence.
-5. **Error handling** — Per-agent `failed` traces; optional retry policy on orchestrator only.
-6. **Polish** — PWA, edge cases, export `antigravity/logs/` for judges.
+1. **Backlog & Scripts** — Set up unit tests, `scripts/test-workflow.js`, and `scripts/export-agent-logs.js` for judges.
+2. **PWA Polish** — Service worker static assets, offline checks, error toasts, and UI micro-interactions.
+3. **Deployment** — Deploy to Vercel/Production with environment configuration.
 
 ### Do not break
 

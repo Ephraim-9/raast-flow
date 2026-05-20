@@ -10,11 +10,11 @@
 
 | Area | Status |
 |------|--------|
-| Phases 1–4 (scaffold, DB, orchestrator, API) | **Done** — inline pipeline in `lib/antigravity-client.ts` |
-| Phase 5 (mobile screens) | **Mostly done** — image upload to backend still stubbed |
-| Phase 3.5 (agent refactor) | **Next** — see below |
-| Real Gemini parser | **Pending** |
-| `lib/agents/` + `workflow-types.ts` | **Pending** |
+| Phases 1–4 (scaffold, DB, orchestrator, API) | **Done** — modular pipeline in `lib/antigravity-client.ts` + `lib/agents/` |
+| Phase 5 (mobile screens) | **Done** — camera upload integrated with backend `FormData` |
+| Phase 3.5 (agent refactor) | **Done** — decoupled agent architecture & Gemini integration |
+| Real Gemini parser | **Done** — real Gemini Vision / text API in `lib/agents/parser.ts` |
+| `lib/agents/` + `workflow-types.ts` | **Done** — isolated agent runs with structured traces |
 
 **Architecture target:** One orchestrator, small agents, shared `WorkflowContext` — full spec in [AGENTS.md](AGENTS.md).
 
@@ -76,7 +76,7 @@
 - [x] Seed mock invoices from `mock-data/invoices.json` (mock-db + optional script)
 - [x] Implement API route `GET /api/invoices?id=...` that returns invoice data (using Admin SDK)
 - [x] Implement API route `PUT /api/invoices/update` for simulation (updates status and warehouseBlocked)
-- [ ] Add Zod validation for request bodies
+- [x] Add Zod validation for request bodies
 - [x] Test both endpoints using Postman or browser
 
 ### Done Criteria
@@ -129,20 +129,20 @@ Codelab: [Getting Started with Google Antigravity](https://codelabs.developers.g
 
 ### Tasks
 
-- [ ] Add `lib/workflow-types.ts` (`WorkflowContext`, `Agent`, `AgentResult`)
-- [ ] Create `lib/agents/parser.ts` — real Gemini Vision; remove hardcoded extraction in orchestrator
-- [ ] Create `lib/agents/lookup.ts`, `matcher.ts`, `decision.ts`, `simulator.ts` — move logic from `runPipeline`
-- [ ] Slim `lib/antigravity-client.ts` to: init doc → loop agents → traces → status updates
-- [ ] Wire image upload: `POST /api/process` reads multipart `file` → `imageBase64`; camera page sends real bytes
-- [ ] Per-agent failure: failed trace + `status: 'failed'` on workflow
-- [ ] Keep [docs/API.md](docs/API.md) field names in traces and API responses
+- [x] Add `lib/workflow-types.ts` (`WorkflowContext`, `Agent`, `AgentResult`)
+- [x] Create `lib/agents/parser.ts` — real Gemini Vision; remove hardcoded extraction in orchestrator
+- [x] Create `lib/agents/lookup.ts`, `matcher.ts`, `decision.ts`, `simulator.ts` — move logic from `runPipeline`
+- [x] Slim `lib/antigravity-client.ts` to: init doc → loop agents → traces → status updates
+- [x] Wire image upload: `POST /api/process` reads multipart `file` → `imageBase64`; camera page sends real bytes
+- [x] Per-agent failure: failed trace + `status: 'failed'` on workflow
+- [x] Keep [docs/API.md](docs/API.md) field names in traces and API responses
 
 ### Done Criteria
 
-- [ ] No agent business logic remains in `runPipeline` (only orchestration)
-- [ ] Parser uses Gemini when `MOCK_MODE` is false
-- [ ] Image path works without client-side mock OCR string
-- [ ] All four demo scenarios still pass
+- [x] No agent business logic remains in `runPipeline` (only orchestration)
+- [x] Parser uses Gemini when `MOCK_MODE` is false
+- [x] Image path works without client-side mock OCR string
+- [x] All four demo scenarios still pass
 
 ---
 

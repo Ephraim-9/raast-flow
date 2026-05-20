@@ -40,30 +40,16 @@ function CameraContent() {
     }
   }, [isGallery, isFromHome]);
 
-  const startProcessing = async (fileName: string, file?: File | Blob) => {
+  const startProcessing = async (fileName: string, file: File | Blob) => {
     setIsUploading(true);
     try {
-      let body;
-      let headers: any = {};
-
-      if (file) {
-        const formData = new FormData();
-        formData.append('inputType', 'image');
-        formData.append('file', file);
-        body = formData;
-      } else {
-        headers = { 'Content-Type': 'application/json' };
-        body = JSON.stringify({ 
-          inputType: 'image', 
-          fileName: fileName,
-          text: `Processed ${fileName}. Found INV-1001 for amount 25000.` // Mock OCR result
-        });
-      }
+      const formData = new FormData();
+      formData.append('inputType', 'image');
+      formData.append('file', file);
 
       const res = await fetch('/api/process', {
         method: 'POST',
-        headers,
-        body
+        body: formData
       });
       const data = await res.json();
       if (data.workflowId) {

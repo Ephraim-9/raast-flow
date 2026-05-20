@@ -1,0 +1,8 @@
+name: decision_agent
+description: Recommends a business outcome (approve, dispute, credit note) and generates a unique tracking ID based on match type.
+inputs:
+  - matchType
+outputs:
+  - recommendedAction
+  - finalAction
+  - actionId

@@ -16,7 +16,7 @@ steps:
     agent: agent3_matcher
     inputs:
       paymentAmount: ${{ step_1_parser.outputs.extractedAmount }}
-      invoiceAmount: ${{ step_2_lookup.outputs.amount }}
+      invoiceAmount: ${{ step_2_lookup.outputs.invoiceData.amount }}
   - id: step_4_decision
     agent: agent4_decision
     inputs:

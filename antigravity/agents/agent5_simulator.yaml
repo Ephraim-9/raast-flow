@@ -1,0 +1,9 @@
+name: simulator_agent
+description: Simulates CRM/ERP updates (reconciled, disputed) and formats mock customer notification preview.
+inputs:
+  - action
+  - invoiceId
+outputs:
+  - afterState
+  - simulationLogs
+  - whatsappPreview

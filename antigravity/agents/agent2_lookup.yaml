@@ -1,0 +1,8 @@
+name: lookup_agent
+description: Retrieves standard invoice data from database based on extracted invoice reference.
+inputs:
+  - invoiceId
+outputs:
+  - invoiceFound
+  - invoiceData
+  - beforeState
