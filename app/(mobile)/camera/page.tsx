@@ -23,7 +23,16 @@ function CameraContent() {
       setPreview(pendingData);
       sessionStorage.removeItem('pending_capture');
       sessionStorage.removeItem('pending_filename');
-      startProcessing(pendingFile || 'image.png');
+      
+      // Convert Data URL to Blob
+      let arr = pendingData.split(','), mime = arr[0].match(/:(.*?);/)![1],
+      bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+      while(n--){
+          u8arr[n] = bstr.charCodeAt(n);
+      }
+      const blob = new Blob([u8arr], {type:mime});
+      
+      startProcessing(pendingFile || 'image.png', blob);
     } else if (fileInputRef.current && (isGallery || !isFromHome)) {
       // If we didn't come from Home with data, or it's gallery mode, trigger picker
       // (Direct navigation to /camera still allows manual trigger)
@@ -31,20 +40,30 @@ function CameraContent() {
     }
   }, [isGallery, isFromHome]);
 
-  const startProcessing = async (fileName: string) => {
+  const startProcessing = async (fileName: string, file?: File | Blob) => {
     setIsUploading(true);
     try {
-      // Simulate network delay for processing/OCR
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const res = await fetch('/api/process', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+      let body;
+      let headers: any = {};
+
+      if (file) {
+        const formData = new FormData();
+        formData.append('inputType', 'image');
+        formData.append('file', file);
+        body = formData;
+      } else {
+        headers = { 'Content-Type': 'application/json' };
+        body = JSON.stringify({ 
           inputType: 'image', 
           fileName: fileName,
           text: `Processed ${fileName}. Found INV-1001 for amount 25000.` // Mock OCR result
-        })
+        });
+      }
+
+      const res = await fetch('/api/process', {
+        method: 'POST',
+        headers,
+        body
       });
       const data = await res.json();
       if (data.workflowId) {
@@ -67,7 +86,7 @@ function CameraContent() {
     };
     reader.readAsDataURL(file);
 
-    await startProcessing(file.name);
+    await startProcessing(file.name, file);
   };
 
   const triggerInput = () => {

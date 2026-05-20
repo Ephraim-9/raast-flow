@@ -2,7 +2,7 @@
 
 ## Raast-Flow
 
-**API request/response shapes:** [docs/API.md](docs/API.md) (canonical). **Seed data:** [mock-data/invoices.json](mock-data/invoices.json).
+**API request/response shapes:** [docs/API.md](docs/API.md) (canonical). **Seed data:** [mock-data/invoices.json](mock-data/invoices.json). **In-memory pipeline model:** `WorkflowContext` in [AGENTS.md](AGENTS.md) (not a separate Firestore document; fields are flattened onto `workflow_executions`).
 
 ---
 

@@ -11,9 +11,11 @@
 | Layer | Role | Where |
 |-------|------|--------|
 | **IDE** | Build and iterate on the repo; export workplan/task artifacts for judges | [antigravity.google](https://antigravity.google) — [Getting Started codelab](https://codelabs.developers.google.com/getting-started-google-antigravity) |
-| **Runtime** | Orchestrate the 5-step payment pipeline (Parser → Simulator) | `lib/antigravity-client.ts`, `antigravity/workflows/`, Firestore traces |
+| **Runtime** | Orchestrate the 5-step payment pipeline (Parser → Simulator) | `lib/antigravity-client.ts` (manager), `lib/agents/*` (workers), `antigravity/workflows/` (spec), Firestore traces |
 
-Hackathon rule: Antigravity must be **central** to orchestration and reasoning. Additional LLMs (Gemini on Vertex) are allowed for OCR/reasoning inside agent steps. Do not implement the full match/decision path as naked `if/else` in `/api/process` bypassing the workflow.
+**Build guide:** [AGENTS.md](AGENTS.md) — workflow context, agent contract, implementation order.
+
+Hackathon rule: Antigravity must be **central** to orchestration and reasoning. Additional LLMs (Gemini on Vertex) are allowed for OCR/reasoning inside agent steps. Do not implement the full match/decision path as naked `if/else` in `/api/process` bypassing the workflow. The orchestrator is **not** the AI; it runs agents in a controlled order with shared state.
 
 **Submission traces:** Antigravity IDE artifacts (workplan, tasks plan) in `antigravity/logs/` **plus** runtime traces in Firestore and the `/process` UI.
 
@@ -36,7 +38,7 @@ Hackathon rule: Antigravity must be **central** to orchestration and reasoning. 
 | Aspect | Choice | Justification |
 |--------|--------|----------------|
 | **Runtime** | Next.js API routes (Node.js 18+) | Single codebase, no extra server needed |
-| **Background jobs** | Not required – all processing synchronous | Hackathon scope fits request‑response |
+| **Background jobs** | Fire-and-forget inside `POST /api/process` (`runPipeline` async) | Hackathon scope; production could use a queue later |
 | **Agent Orchestration** | Google Antigravity (IDE + runtime workflow) | Core requirement — **25%** of Challenge 1 judging ([docs/HACKATHON.md](docs/HACKATHON.md)) |
 | **LLM & Vision** | Google Gemini 2.0 Flash via Vertex AI | Native integration with Antigravity, fast OCR |
 
@@ -132,7 +134,14 @@ raast-flow/
 │   ├── before-after-slider.tsx
 │   └── whatsapp-preview.tsx
 ├── lib/
-│   ├── antigravity-client.ts
+│   ├── antigravity-client.ts     # Orchestrator only (no agent bodies long-term)
+│   ├── workflow-types.ts         # WorkflowContext, Agent, AgentResult
+│   ├── agents/                   # One file per agent (target structure)
+│   │   ├── parser.ts
+│   │   ├── lookup.ts
+│   │   ├── matcher.ts
+│   │   ├── decision.ts
+│   │   └── simulator.ts
 │   ├── firebase-admin.ts
 │   └── mock-db.ts                # MOCK_MODE fallback
 ├── mock-data/
@@ -219,12 +228,13 @@ MOCK_MODE=false
     │       └─► Antigravity Client ─► Start workflow
     │                │
     │                ▼
-    │       [Antigravity Orchestrator]
-    │        Agent1(Parser) → Gemini Vision
-    │        Agent2(Lookup) → Firestore (invoices)
-    │        Agent3(Matcher) → reasoning
-    │        Agent4(Decision) → action generation
-    │        Agent5(Simulator) → mock warehouse + WhatsApp
+│       [Orchestrator: antigravity-client.ts]
+│        lib/agents/parser.ts      → Gemini Vision / OCR
+│        lib/agents/lookup.ts      → Firestore invoices
+│        lib/agents/matcher.ts     → match type + reasoning
+│        lib/agents/decision.ts    → approve / dispute / credit_note
+│        lib/agents/simulator.ts   → warehouse update + WhatsApp preview
+│        (each step → workflow_executions/.../traces)
     │                │
     │                ▼
     └─► Poll /api/workflow/[id]/status ──► Display trace + result
@@ -238,5 +248,5 @@ MOCK_MODE=false
 |------|------|------|
 | Tech Lead | [Your Name] | May 15, 2026 |
 
-**Version:** 1.1  
-**Status:** Ready for implementation (routes and API aligned with App-Flow and docs/API.md)
+**Version:** 1.2  
+**Status:** Core app implemented; refactor agents into `lib/agents/` + real parser + image upload per [AGENTS.md](AGENTS.md)

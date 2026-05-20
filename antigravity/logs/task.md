@@ -1,44 +1,55 @@
-# Raast-Flow Implementation Tasks
+# Raast-Flow — Antigravity task list
 
-- `[x]` **Phase 1: Project Setup & Environment**
-  - `[x]` Scaffold Next.js 14 App Router project with TypeScript and Tailwind CSS.
-  - `[x]` Install dependencies: `firebase`, `@google-cloud/vertexai`, `lucide-react`, `swr`, `zod`, `next-pwa`.
-  - `[x]` Setup folder structure (`app/`, `components/`, `lib/`, `antigravity/`).
-  - `[x]` Initialize environment variables and `.env.local` scaffolding.
+**Canonical guide:** [AGENTS.md](../../AGENTS.md) · **Phases:** [Implementation-Plan.md](../../Implementation-Plan.md)
 
-- `[x]` **Phase 2: Database & Mock Data**
-  - `[x]` Initialize Firebase Admin SDK locally.
-  - `[x]` Implement server-side API routes for Firestore operations.
-  - `[x]` Seed Firestore with data from `mock-data/invoices.json`.
+Update this file as work completes. Mark `[x]` only when verified in code.
 
-- `[x]` **Phase 3: Antigravity Agent Definitions**
-  - `[x]` Implement custom Antigravity orchestrator in `lib/antigravity-client.ts`.
-  - `[x]` Define the 5 agents (parser, lookup, matcher, decision, simulator) as YAMLs.
-  - `[x]` Create `antigravity/workflows/main_workflow.yaml`.
+---
 
-- `[x]` **Phase 4: Backend API – Workflow Endpoints**
-  - `[x]` Implement `POST /api/process`.
-  - `[x]` Implement `GET /api/workflow/[id]/status`.
-  - `[x]` Implement `GET /api/workflow/[id]/result`.
-  - `[x]` Implement `GET /api/history`.
+## Completed
 
-- `[/]` **Phase 5: Mobile App – Core Screens**
-  - `[ ]` Build `app/(mobile)/page.tsx`.
-  - `[ ]` Build `/camera`, `/manual`, `/whatsapp` input screens.
-  - `[ ]` Build `/process` screen.
-  - `[ ]` Build `/result` screen.
-  - `[ ]` Build `/history` screen.
+- [x] Phase 1: Next.js scaffold, Tailwind, deps, `MOCK_MODE`
+- [x] Phase 2: Firestore/mock-db, invoices API, seed data
+- [x] Phase 3 (inline): Orchestrator in `lib/antigravity-client.ts`, YAML in `antigravity/`
+- [x] Phase 4: `POST /api/process`, workflow status/result/history
+- [x] Phase 5 (core): Home, manual, whatsapp, process, result, history screens
+- [x] Phase 6: Simulator updates invoice + before/after + WhatsApp preview
 
-- `[ ]` **Phase 6: Action Simulation & State Change**
-  - `[ ]` Implement the Simulator agent logic.
-  - `[ ]` Log the `beforeState` and `afterState` to Firestore.
+---
 
-- `[ ]` **Phase 7: UI Polish & Edge Cases**
-  - `[ ]` Refine Shadcn UI components.
-  - `[ ]` Apply Design System (colors, rounded corners, typography).
-  - `[ ]` Handle error boundaries, empty states, and PWA manifest generation.
+## Active — Phase 3.5 (do in this order)
 
-- `[ ]` **Phase 8 & 9: Testing & Documentation**
-  - `[ ]` Test scenarios.
-  - `[ ]` Export Antigravity artifacts (logs, workplan, task list) to `antigravity/logs/`.
-  - `[ ]` Ensure the project is deployment-ready for Vercel.
+1. [ ] **Image upload** — `app/api/process/route.ts` reads multipart `file` → `imageBase64` on input; `app/(mobile)/camera/page.tsx` sends FormData or base64 (remove client mock OCR string)
+2. [ ] **`lib/workflow-types.ts`** — `WorkflowContext`, `Agent`, `AgentResult`
+3. [ ] **`lib/agents/parser.ts`** — Gemini Vision/text; no hardcoded INV-1001 / 25000 in orchestrator
+4. [ ] **`lib/agents/lookup.ts`** — Firestore invoice fetch
+5. [ ] **`lib/agents/matcher.ts`** — match type + reasoning
+6. [ ] **`lib/agents/decision.ts`** — action + actionId
+7. [ ] **`lib/agents/simulator.ts`** — DB update, logs, whatsappPreview
+8. [ ] **Slim orchestrator** — `antigravity-client.ts` only loops agents + traces + persistence
+9. [ ] **Failed agent traces** — `status: 'failed'` on trace and workflow doc
+10. [ ] **Sync YAML** — `antigravity/workflows/main_workflow.yaml` matches agent I/O
+
+---
+
+## Backlog
+
+- [ ] Zod validation on API routes
+- [ ] `scripts/test-workflow.js` + `scripts/export-agent-logs.js`
+- [ ] Phase 7: UI polish, PWA install, error toasts
+- [ ] Phase 8: Full journey regression (4 demo scenarios + manual skip parser)
+- [ ] Phase 9: Vercel deploy, demo video, judge log export in `antigravity/logs/`
+- [ ] Optional: `lib/agents/notification.ts` (split from simulator)
+- [ ] Optional: Fraud / Policy agents (after core chain stable)
+
+---
+
+## Regression checklist
+
+| Scenario | Input | Expected |
+|----------|-------|----------|
+| Exact match | INV-1001 / 25000 | approve, warehouse released |
+| Underpayment | INV-1002 / 20000 | dispute |
+| Overpayment | INV-1003 / 30000 | credit_note |
+| Missing invoice | INV-9999 | dispute, no_invoice |
+| Manual | `inputType: manual` | parser skipped |

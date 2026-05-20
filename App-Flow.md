@@ -2,7 +2,7 @@
 
 ## Raast-Flow
 
-**Canonical routes:** All pages live under the Next.js route group `app/(mobile)/`. API contracts: [docs/API.md](docs/API.md).
+**Canonical routes:** All pages live under the Next.js route group `app/(mobile)/`. API contracts: [docs/API.md](docs/API.md). Backend workflow: [AGENTS.md](AGENTS.md) (orchestrator + agents; UI has no agent logic).
 
 ---
 
@@ -240,5 +240,5 @@ For post‑hackathon (v2), we would add Firebase Auth with Google and email/pass
 |------|------|------|
 | Product Owner | [Your Name] | May 15, 2026 |
 
-**Version:** 1.1  
-**Status:** Ready for UI implementation (routes aligned with TRD)
+**Version:** 1.2  
+**Status:** UI implemented; image upload must send real bytes to API (see AGENTS.md Phase 3.5)

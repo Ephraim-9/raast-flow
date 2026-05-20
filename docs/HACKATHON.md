@@ -32,7 +32,7 @@ Teams **must** use Google Antigravity as the core platform to:
 
 Additional LLMs (e.g. Gemini on Vertex) are allowed; **Antigravity must be central** to system logic.
 
-**Raast-Flow mapping:** `lib/antigravity-client.ts` + `antigravity/workflows/main_workflow.yaml` (or equivalent SDK workflow) drives the 5-step pipeline; development also uses the Antigravity IDE.
+**Raast-Flow mapping:** `lib/antigravity-client.ts` (orchestrator) + `lib/agents/*` (runtime workers) + `antigravity/workflows/main_workflow.yaml` (submission spec) drive the 5-step pipeline; build guide: [AGENTS.md](../AGENTS.md); development uses the Antigravity IDE.
 
 ---
 

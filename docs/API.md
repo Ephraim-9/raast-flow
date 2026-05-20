@@ -2,7 +2,7 @@
 
 All paths are relative to the Next.js app origin. The mobile client calls these routes only — **no direct Firestore access from the browser**.
 
-Types below are the source of truth; implement with Zod in `app/api/**/route.ts`.
+Types below are the source of truth; implement with Zod in `app/api/**/route.ts`. Workflow orchestration lives in `lib/antigravity-client.ts` + `lib/agents/*` — see [AGENTS.md](../AGENTS.md).
 
 ---
 
@@ -50,9 +50,14 @@ Start a payment reconciliation workflow.
 
 ```json
 {
-  "workflowId": "wf_20260515_001"
+  "workflowId": "wf_20260515_001",
+  "status": "running"
 }
 ```
+
+`status` is always `running` on create; poll `/status` for completion.
+
+**Implementation note:** Multipart `file` must be converted server-side to `imageBase64` on the workflow input before the parser agent runs. Client must not rely on mock OCR strings in JSON for production image flow.
 
 ### Errors
 

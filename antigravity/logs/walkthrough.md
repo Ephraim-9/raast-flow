@@ -6,9 +6,11 @@ We successfully implemented the **Raast-Flow** PWA according to the hackathon sp
 
 ### 1. Agent Orchestration Layer
 - Built a custom orchestrator (`lib/antigravity-client.ts`) representing the 5-step Antigravity workflow pipeline: Parser, Lookup, Matcher, Decision, Simulator.
-- Designed the backend API using Next.js 15 App Router (`app/api/process`, `app/api/workflow/[id]/status`, etc.) to asynchronously run the workflow and provide polling updates to the client.
-- Orchestration uses Vertex AI endpoints (gracefully falling back to mocked logical simulation when missing API keys using `MOCK_MODE=true`).
+- **Target architecture** (see [AGENTS.md](../../AGENTS.md)): extract each step to `lib/agents/*.ts`, shared `WorkflowContext` in `lib/workflow-types.ts`; orchestrator remains manager-only.
+- Designed the backend API using Next.js App Router (`app/api/process`, `app/api/workflow/[id]/status`, etc.) to asynchronously run the workflow and provide polling updates to the client.
+- Orchestration uses Vertex AI endpoints (gracefully falling back to mocked logical simulation when `MOCK_MODE=true`).
 - Defined declarative `.yaml` templates in `antigravity/agents/` and `antigravity/workflows/` as required for Challenge 1 submission.
+- **Next work:** real image upload to API, real Gemini parser, agent file split (Phase 3.5 in [Implementation-Plan.md](../../Implementation-Plan.md)).
 
 ### 2. Frontend PWA Screens
 Built out the canonical user journeys according to `App-Flow.md`:

@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Raast-Flow
 
-## Getting Started
+**Autonomous payment reconciliation PWA** — unstructured receipt/WhatsApp input → agent pipeline → approve, dispute, or credit note → simulated warehouse + notification.
 
-First, run the development server:
+Built for **Google Antigravity Hackathon — Challenge 1** (Content-to-Action). See [docs/HACKATHON.md](docs/HACKATHON.md).
+
+## Quick start
 
 ```bash
+npm install
+cp .env.example .env.local   # if present; else see TRD.md env vars
+# Set MOCK_MODE=true for local demo without GCP/Firebase
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## For Antigravity / AI builders
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Start here:** [AGENTS.md](AGENTS.md) — architecture, agent contract, implementation order, and current status.
 
-## Learn More
+| Doc | Purpose |
+|-----|---------|
+| [AGENTS.md](AGENTS.md) | Canonical build guide for the IDE |
+| [Implementation-Plan.md](Implementation-Plan.md) | Phased checklist |
+| [TRD.md](TRD.md) | Technical requirements |
+| [App-Flow.md](App-Flow.md) | Routes and user journeys |
+| [docs/API.md](docs/API.md) | HTTP contracts |
+| [antigravity/logs/task.md](antigravity/logs/task.md) | Live task tracker |
 
-To learn more about Next.js, take a look at the following resources:
+## Architecture (one line)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`Frontend` → `POST /api/process` → `lib/antigravity-client.ts` (orchestrator) → `lib/agents/*` (chain) → Firestore traces → poll `/api/workflow/{id}/status` → `/result`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+YAML under `antigravity/` documents the same pipeline for hackathon submission; **runtime** is TypeScript in `lib/`.
 
-## Deploy on Vercel
+## Demo data
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Seed invoices: [mock-data/invoices.json](mock-data/invoices.json) — INV-1001 (exact match), INV-1002 (underpay), INV-1003 (overpay), etc.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy
+
+Vercel + Firebase Firestore. Set env vars from [TRD.md](TRD.md). Use `MOCK_MODE=true` on preview if credentials are missing.

@@ -9,10 +9,14 @@ export async function POST(request: NextRequest) {
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
       inputData.inputType = formData.get('inputType') || 'image';
+      
       const file = formData.get('file');
       if (file && file instanceof Blob) {
-         // Convert to base64 or pass as is
-         // inputData.imageBase64 = ... 
+         const buffer = Buffer.from(await file.arrayBuffer());
+         inputData.imageBase64 = buffer.toString('base64');
+         inputData.mimeType = file.type;
+      } else if (typeof file === 'string') {
+         inputData.text = file; // Fallback if file was sent as string
       }
     } else {
       inputData = await request.json();

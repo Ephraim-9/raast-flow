@@ -1,65 +1,103 @@
-# Raast-Flow Implementation Plan
+# Raast-Flow — Antigravity implementation plan
 
-This plan outlines the complete build sequence for the Raast-Flow project (Google Antigravity Hackathon Challenge 1). It is based directly on the provided `Implementation-Plan.md` and related documentation.
+**Last updated:** May 2026 · **Source of truth for architecture:** [AGENTS.md](../../AGENTS.md)
 
-## User Review Required
+---
 
-- **PWA Tooling**: The TRD specifies `next-pwa`. I will proceed with `next-pwa`, but please note that if there are any Next.js 14 App Router caching issues with it, I may suggest pivoting to `@serwist/next` during Phase 7.
-- **Antigravity SDK**: As per `AGENTS.md`, I will build a custom lightweight orchestrator in `lib/antigravity-client.ts` that uses `@google-cloud/vertexai` and handles the workflow simulation state exactly as required by the judges.
+## What we are building
 
-## Proposed Changes
+One **workflow engine** (not scattered AI calls):
 
-### Phase 1: Project Setup & Environment
-- Scaffold Next.js 14 App Router project with TypeScript and Tailwind CSS.
-- Install dependencies: `firebase`, `@google-cloud/vertexai`, `lucide-react`, `swr`, `zod`, `next-pwa`.
-- Setup folder structure (`app/`, `components/`, `lib/`, `antigravity/`).
-- Initialize environment variables and `.env.local` scaffolding.
+```
+User input → POST /api/process → workflowId
+           → Orchestrator (lib/antigravity-client.ts)
+           → Agent chain (lib/agents/*)
+           → Traces + Firestore
+           → Poll GET /api/workflow/{id}/status
+           → GET /api/workflow/{id}/result → /result UI
+```
 
-### Phase 2: Database & Mock Data
-- Initialize Firebase Admin SDK locally.
-- Implement server-side API routes for Firestore operations:
-  - `GET /api/invoices?id={invoiceId}`
-  - `PUT /api/invoices/update`
-- Seed Firestore with data from `mock-data/invoices.json`.
+---
 
-### Phase 3: Antigravity Agent Definitions
-- Implement custom Antigravity orchestrator in `lib/antigravity-client.ts`.
-- Define the 5 agents (parser, lookup, matcher, decision, simulator) as YAMLs in `antigravity/agents/`.
-- Create `antigravity/workflows/main_workflow.yaml`.
+## Two Antigravity layers
 
-### Phase 4: Backend API – Workflow Endpoints
-- Implement `POST /api/process` to start the Antigravity workflow.
-- Implement `GET /api/workflow/[id]/status` for live tracing.
-- Implement `GET /api/workflow/[id]/result` for final outcome.
-- Implement `GET /api/history` for recent activity.
+| Layer | Location | Purpose |
+|-------|----------|---------|
+| **IDE** | Antigravity app + this repo | Planning, coding, export workplan/tasks to `antigravity/logs/` |
+| **Runtime** | `lib/antigravity-client.ts` + `lib/agents/` | What actually runs on Vercel |
 
-### Phase 5: Mobile App – Core Screens
-- Build `app/(mobile)/page.tsx` (Home with 4 input cards).
-- Build `/camera`, `/manual`, `/whatsapp` input screens.
-- Build `/process` screen showing live agent trace updates.
-- Build `/result` screen showing before/after slider and mock WhatsApp preview.
-- Build `/history` screen for past runs.
+YAML (`antigravity/workflows/main_workflow.yaml`, `antigravity/agents/*.yaml`) documents the pipeline for **hackathon judges**. TypeScript agents are the **runtime**.
 
-### Phase 6: Action Simulation & State Change
-- Implement the Simulator agent logic to correctly update `warehouseBlocked` and `status` based on the Matcher/Decision output.
-- Log the `beforeState` and `afterState` to Firestore.
+---
 
-### Phase 7: UI Polish & Edge Cases
-- Refine Shadcn UI components.
-- Apply Design System (colors, rounded corners, typography).
-- Handle error boundaries, empty states, and PWA manifest generation.
+## Target code layout
 
-### Phase 8 & 9: Testing & Documentation
-- Test exact match, overpayment, and underpayment scenarios.
-- Export Antigravity artifacts (logs, workplan, task list) to `antigravity/logs/` as requested for the submission.
-- Ensure the project is deployment-ready for Vercel.
+```
+lib/
+  antigravity-client.ts    # Manager only: startWorkflow, runPipeline loop
+  workflow-types.ts        # WorkflowContext, Agent, AgentResult
+  agents/
+    parser.ts              # Gemini OCR — PRIORITY
+    lookup.ts
+    matcher.ts
+    decision.ts
+    simulator.ts
+```
 
-## Verification Plan
+**Rules:** No agent logic in `app/(mobile)/*` or naked match/decision in `app/api/process/route.ts`.
 
-### Automated Tests
-- Endpoints (`/api/invoices`, `/api/process`, `/api/workflow/[id]/status`) will be verified manually via HTTP requests or local test scripts before moving to UI integration.
+---
 
-### Manual Verification
-- Verify each PWA route in the browser.
-- Run complete end-to-end user journeys (Exact Match, Underpayment, Missing Invoice).
-- Verify Firebase state transitions.
+## Agent pipeline
+
+| # | Agent | Input slice | Output slice |
+|---|-------|-------------|--------------|
+| 1 | parser | `input` | `extracted` |
+| 2 | lookup | `extracted.invoiceId` | `lookup` |
+| 3 | matcher | `extracted` + `lookup` | `match` |
+| 4 | decision | `match` | `decision` |
+| 5 | simulator | `decision` + `lookup` | `result` (+ invoice DB write) |
+
+Each step: `writeTrace(running)` → `agent.run(ctx)` → `writeTrace(completed|failed)` → merge context → `updateWorkflowStatus`.
+
+---
+
+## Current gap (why Phase 3.5 exists)
+
+The repo **works end-to-end** but:
+
+- All five agents are **inline** inside `runPipeline()` in `antigravity-client.ts`
+- Parser uses **hardcoded** amounts/references when not manual
+- Camera sends **mock JSON text**, not image bytes to the API
+- `lib/agents/` and `workflow-types.ts` **do not exist yet**
+
+---
+
+## Implementation order (execute sequentially)
+
+1. Wire real image upload to `POST /api/process`
+2. Add `lib/workflow-types.ts`
+3. Implement `lib/agents/parser.ts` with Gemini (respect `MOCK_MODE`)
+4. Extract lookup, matcher, decision, simulator into `lib/agents/`
+5. Refactor orchestrator to delegate only
+6. Failed-trace handling
+7. Regression: four demo scenarios + manual path
+8. Export logs + demo video (Phase 9)
+
+---
+
+## Verification
+
+- `MOCK_MODE=true` — full demo without GCP
+- `MOCK_MODE=false` — parser calls Vertex AI
+- `/process` shows live traces with reasoning
+- `/result` shows banner, actionId, before/after, WhatsApp preview
+- API responses match [docs/API.md](../../docs/API.md)
+
+---
+
+## User review notes
+
+- **PWA:** `next-pwa` or `@serwist/next` if App Router caching issues appear (Phase 7).
+- **Notification agent:** Optional; WhatsApp preview can stay in simulator for hackathon.
+- **Do not** remove `antigravity/` YAML — required for Challenge 1 submission artifacts.

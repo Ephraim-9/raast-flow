@@ -1,3 +1,5 @@
+# Declarative spec for hackathon submission. Runtime implementation:
+# lib/antigravity-client.ts (orchestrator) + lib/agents/*.ts — see AGENTS.md
 name: raast_flow_main
 description: Main workflow orchestrating the content-to-action pipeline for Raast-Flow.
 steps:

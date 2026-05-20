@@ -7,7 +7,7 @@ Turn any payment proof into an instant warehouse release order — powered by Go
 
 **Hackathon:** Google Antigravity Hackathon — **Challenge 1** (Autonomous Content-to-Action Agent). See [docs/HACKATHON.md](docs/HACKATHON.md) for official requirements and judging weights.
 
-**Related docs:** [README.md](README.md) · [TRD.md](TRD.md) · [App-Flow.md](App-Flow.md) · [docs/API.md](docs/API.md)
+**Related docs:** [README.md](README.md) · [AGENTS.md](AGENTS.md) (build guide) · [TRD.md](TRD.md) · [App-Flow.md](App-Flow.md) · [docs/API.md](docs/API.md)
 
 ---
 
