@@ -1,24 +1,32 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
-// In-memory mock DB
-const DB = {
-  invoices: new Map(),
-  workflow_executions: new Map(),
-};
+// In-memory mock DB using global to persist across Next.js API route re-compilations
+const globalAny: any = global;
 
-// Seed invoices
-try {
-  const dataPath = path.join(process.cwd(), 'mock-data/invoices.json');
-  const invoices = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-  invoices.forEach((inv: any) => DB.invoices.set(inv.id, inv));
-} catch (e) {
-  console.log('Could not load mock invoices from JSON. Using empty DB.', e);
+if (!globalAny.__MOCK_DB__) {
+  globalAny.__MOCK_DB__ = {
+    invoices: new Map(),
+    workflow_executions: new Map(),
+  };
+
+  // Seed invoices
+  try {
+    const dataPath = path.join(process.cwd(), "mock-data/invoices.json");
+    const invoices = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+    invoices.forEach((inv: any) =>
+      globalAny.__MOCK_DB__.invoices.set(inv.id, inv)
+    );
+  } catch (e) {
+    console.log("Could not load mock invoices from JSON. Using empty DB.", e);
+  }
 }
+
+const DB = globalAny.__MOCK_DB__;
 
 // Minimal Firestore-like API
 export class MockFirestore {
-  collection(name: 'invoices' | 'workflow_executions') {
+  collection(name: "invoices" | "workflow_executions") {
     return {
       doc: (id: string) => {
         return {
@@ -27,7 +35,7 @@ export class MockFirestore {
             return {
               id,
               exists: !!data,
-              data: () => data || null
+              data: () => data || null,
             };
           },
           set: async (data: any) => {
@@ -44,18 +52,23 @@ export class MockFirestore {
             return {
               doc: (subId: string) => ({
                 set: async (data: any) => {
-                  (DB[subMapName] as Map<string, any>).set(subId, { id: subId, ...data });
-                }
+                  (DB[subMapName] as Map<string, any>).set(subId, {
+                    id: subId,
+                    ...data,
+                  });
+                },
               }),
               get: async () => {
-                const docs = Array.from((DB[subMapName] as Map<string, any> || new Map()).values()).map(data => ({
+                const docs = Array.from(
+                  ((DB[subMapName] as Map<string, any>) || new Map()).values()
+                ).map((data: any) => ({
                   id: data.id,
-                  data: () => data
+                  data: () => data,
                 }));
                 return { docs };
-              }
+              },
             };
-          }
+          },
         };
       },
       orderBy: (field: string, direction: string) => ({
@@ -63,20 +76,20 @@ export class MockFirestore {
           get: async () => {
             const allDocs = Array.from(DB[name].values());
             // Sort logic simplified
-            allDocs.sort((a, b) => {
-               const valA = a[field] || '';
-               const valB = b[field] || '';
-               if (direction === 'desc') return valB > valA ? 1 : -1;
-               return valA > valB ? 1 : -1;
+            allDocs.sort((a: any, b: any) => {
+              const valA = a[field] || "";
+              const valB = b[field] || "";
+              if (direction === "desc") return valB > valA ? 1 : -1;
+              return valA > valB ? 1 : -1;
             });
-            const docs = allDocs.slice(0, limitNum).map(data => ({
+            const docs = allDocs.slice(0, limitNum).map((data: any) => ({
               id: data.id,
-              data: () => data
+              data: () => data,
             }));
             return { docs };
-          }
-        })
-      })
+          },
+        }),
+      }),
     };
   }
 }
