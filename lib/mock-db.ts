@@ -1,20 +1,26 @@
 import fs from 'fs';
 import path from 'path';
 
-// In-memory mock DB
-const DB = {
-  invoices: new Map(),
-  workflow_executions: new Map(),
-};
+// In-memory mock DB using global to persist across Next.js API route re-compilations
+const globalAny: any = global;
 
-// Seed invoices
-try {
-  const dataPath = path.join(process.cwd(), 'mock-data/invoices.json');
-  const invoices = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-  invoices.forEach((inv: any) => DB.invoices.set(inv.id, inv));
-} catch (e) {
-  console.log('Could not load mock invoices from JSON. Using empty DB.', e);
+if (!globalAny.__MOCK_DB__) {
+  globalAny.__MOCK_DB__ = {
+    invoices: new Map(),
+    workflow_executions: new Map(),
+  };
+
+  // Seed invoices
+  try {
+    const dataPath = path.join(process.cwd(), 'mock-data/invoices.json');
+    const invoices = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+    invoices.forEach((inv: any) => globalAny.__MOCK_DB__.invoices.set(inv.id, inv));
+  } catch (e) {
+    console.log('Could not load mock invoices from JSON. Using empty DB.', e);
+  }
 }
+
+const DB = globalAny.__MOCK_DB__;
 
 // Minimal Firestore-like API
 export class MockFirestore {
