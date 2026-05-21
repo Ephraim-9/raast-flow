@@ -18,7 +18,7 @@ Start a payment reconciliation workflow.
 
 ```json
 {
-  "inputType": "text" | "manual" | "image",
+  "inputType": "text" | "manual" | "image" | "whatsapp",
   "text": "INV-1001 ka 25000 diye",
   "manual": {
     "amount": 25000,
@@ -33,8 +33,8 @@ Start a payment reconciliation workflow.
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| `inputType` | Yes | `image`, `text`, or `manual` |
-| `text` | If `inputType` is `text` | WhatsApp-style message |
+| `inputType` | Yes | `image`, `text`, `whatsapp`, or `manual` |
+| `text` | If `inputType` is `text` or `whatsapp` | WhatsApp-style message |
 | `manual` | If `inputType` is `manual` | Sets `skipParser: true` internally |
 | `imageBase64` | If `inputType` is `image` | Not stored after processing |
 | `skipParser` | No | Default `true` when `manual` is sent |

@@ -21,8 +21,8 @@ Update this file as work completes. Mark `[x]` only when verified in code.
 
 ## Active — Final Polish & Backlog (do in this order)
 
-1. [ ] **`scripts/test-workflow.js`** — script to run automated pipeline tests
-2. [ ] **`scripts/export-agent-logs.js`** — script to export run traces for judges
+1. [x] **`scripts/test-workflow.js`** — script to run automated pipeline tests
+2. [x] **`scripts/export-agent-logs.js`** — script to export run traces for judges
 3. [ ] **Phase 7: PWA Polish** — Service worker configuration, standalone style tweaks, offline banner
 4. [ ] **Phase 8: Full journey regression** — verify 4 demo scenarios and manual skip parser
 5. [ ] **Phase 9: Vercel deploy** — deploy production build and confirm live environment variables

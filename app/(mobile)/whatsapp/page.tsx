@@ -6,15 +6,20 @@ import { MessageCircle } from 'lucide-react';
 
 export default function WhatsAppPage() {
   const [isSending, setIsSending] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [reference, setReference] = useState('');
+  const [amount, setAmount] = useState('');
+  const [note, setNote] = useState('');
   const router = useRouter();
 
   const handleSend = async () => {
     setIsSending(true);
     try {
+      const chatText = `Please pay invoice ${reference} for ${amount}. ${note}`;
       const res = await fetch('/api/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inputType: 'whatsapp', text: 'Sent via WhatsApp' })
+        body: JSON.stringify({ inputType: 'whatsapp', text: chatText })
       });
       const data = await res.json();
       if (data.workflowId) {
@@ -44,19 +49,42 @@ export default function WhatsAppPage() {
         <div className="flex flex-col gap-[11px] mb-5">
           <div>
             <p className="text-[10.5px] text-white/40 mb-[5px] font-medium">WHATSAPP NUMBER</p>
-            <input className="w-full bg-white/5 border border-white/10 rounded-[10px] p-[11px] px-3 text-[13px] text-white outline-none focus:border-primary transition-colors placeholder:text-white/30" placeholder="+1 (555) 000-0000" type="tel" />
+            <input 
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-[10px] p-[11px] px-3 text-[13px] text-white outline-none focus:border-primary transition-colors placeholder:text-white/30" 
+              placeholder="+1 (555) 000-0000" 
+              type="tel" 
+            />
           </div>
           <div>
             <p className="text-[10.5px] text-white/40 mb-[5px] font-medium">TICKET / REFERENCE NO.</p>
-            <input className="w-full bg-white/5 border border-white/10 rounded-[10px] p-[11px] px-3 text-[13px] text-white outline-none focus:border-primary transition-colors placeholder:text-white/30" placeholder="e.g. TKT-4821" />
+            <input 
+              value={reference}
+              onChange={(e) => setReference(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-[10px] p-[11px] px-3 text-[13px] text-white outline-none focus:border-primary transition-colors placeholder:text-white/30" 
+              placeholder="e.g. INV-1002" 
+            />
           </div>
           <div>
             <p className="text-[10.5px] text-white/40 mb-[5px] font-medium">AMOUNT DUE</p>
-            <input className="w-full bg-white/5 border border-white/10 rounded-[10px] p-[11px] px-3 text-[13px] text-white outline-none focus:border-primary transition-colors placeholder:text-white/30" placeholder="$0.00" type="number" />
+            <input 
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-[10px] p-[11px] px-3 text-[13px] text-white outline-none focus:border-primary transition-colors placeholder:text-white/30" 
+              placeholder="20000" 
+              type="number" 
+            />
           </div>
           <div>
             <p className="text-[10.5px] text-white/40 mb-[5px] font-medium">NOTE (OPTIONAL)</p>
-            <textarea className="w-full bg-white/5 border border-white/10 rounded-[10px] p-[11px] px-3 text-[13px] text-white outline-none focus:border-primary transition-colors resize-none placeholder:text-white/30" rows={2} placeholder="Add a note..."></textarea>
+            <textarea 
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-[10px] p-[11px] px-3 text-[13px] text-white outline-none focus:border-primary transition-colors resize-none placeholder:text-white/30" 
+              rows={2} 
+              placeholder="Add a note..."
+            ></textarea>
           </div>
         </div>
 
