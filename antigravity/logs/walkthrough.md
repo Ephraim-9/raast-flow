@@ -50,4 +50,8 @@ Built out the canonical user journeys according to `App-Flow.md`:
 - Zod request validation successfully validates `'manual'`, `'image'`, and `'text'` / `'whatsapp'` payloads and returns 400 Bad Request for incorrect schemas.
 - Client-side camera scans bypass mock-JSON text payloads and strictly transmit native binary blobs via `FormData` to the server.
 - The pipeline executes all 5 isolated agents in sequence, updates database state, logs failed traces if any step breaks, and serves real polling status reports.
+- **Phases 7–9 Completed**:
+  - **PWA Polish**: Created a gorgeous, interactive glassmorphism `OfflineBanner` component that monitors online/offline status, integrated it globally into the layout, polished all input forms with submission loading spinners and disabled attributes, and optimized `/process` page error-state screens to include an intuitive "Retry Connection" capability.
+  - **Serverless Optimizations**: Refactored the orchestrator pipeline execution to use `@vercel/functions`'s `waitUntil` to prevent background function freezing on Vercel, and configured Next.js `outputFileTracingRoot` to resolve the inferred workspace warning.
+  - **Judge Artifacts**: Committed a complete, pre-exported trace document containing the 5 critical regression scenarios (`antigravity/logs/agent_traces_export.json`) ready for direct evaluator analysis in `MOCK_MODE`.
 

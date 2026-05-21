@@ -52,8 +52,8 @@ const testScenarios = [
 ];
 
 async function runTests() {
-  const baseUrl = "http://localhost:3000";
-  console.log("Starting workflow tests...\n");
+  const baseUrl = process.env.BASE_URL || "http://localhost:3000";
+  console.log(`Starting workflow tests against ${baseUrl}...\n`);
 
   for (const scenario of testScenarios) {
     console.log(`Running scenario: ${scenario.name}`);

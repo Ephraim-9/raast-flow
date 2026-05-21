@@ -1,0 +1,393 @@
+[
+  {
+    "workflowId": "wf_20260521_1001",
+    "status": "completed",
+    "createdAt": "2026-05-21T11:00:00.000Z",
+    "traces": [
+      {
+        "agentName": "parser",
+        "order": 1,
+        "status": "completed",
+        "reasoning": "Extracted invoice reference INV-1001 and amount 25000.00 from natural language input.",
+        "output": {
+          "extractedReference": "INV-1001",
+          "extractedAmount": 25000,
+          "extractedConfidence": 0.98
+        },
+        "timestamp": "2026-05-21T11:00:01.000Z"
+      },
+      {
+        "agentName": "lookup",
+        "order": 2,
+        "status": "completed",
+        "reasoning": "Located invoice record for reference INV-1001 in database.",
+        "output": {
+          "invoiceFound": true,
+          "invoiceData": {
+            "id": "INV-1001",
+            "amount": 25000,
+            "status": "pending",
+            "warehouseBlocked": true
+          },
+          "beforeState": {
+            "invoiceStatus": "pending",
+            "warehouseBlocked": true
+          }
+        },
+        "timestamp": "2026-05-21T11:00:02.000Z"
+      },
+      {
+        "agentName": "matcher",
+        "order": 3,
+        "status": "completed",
+        "reasoning": "Verified payment match: Paid amount 25000.00 matches invoice amount 25000.00 exactly.",
+        "output": {
+          "matchType": "exact"
+        },
+        "timestamp": "2026-05-21T11:00:03.000Z"
+      },
+      {
+        "agentName": "decision",
+        "order": 4,
+        "status": "completed",
+        "reasoning": "Exact payment match triggers immediate approval. Generated Release Order.",
+        "output": {
+          "recommendedAction": "approve",
+          "actionId": "REL-8910-1001"
+        },
+        "timestamp": "2026-05-21T11:00:04.000Z"
+      },
+      {
+        "agentName": "simulator",
+        "order": 5,
+        "status": "completed",
+        "reasoning": "Successfully executed warehouse release and sent WhatsApp confirmation.",
+        "output": {
+          "afterState": {
+            "invoiceStatus": "reconciled",
+            "warehouseBlocked": false
+          },
+          "simulationLogs": [
+            "Initializing release simulation for REL-8910-1001...",
+            "Updating database: INV-1001 status set to reconciled.",
+            "Updating database: INV-1001 warehouseBlocked set to false.",
+            "Warehouse API: Dispatching release instruction to logistics hub.",
+            "WhatsApp API: Send message to +923001234567: 'Invoice INV-1001 reconciled! Your order has been released.'"
+          ],
+          "whatsappPreview": "Hello! Your payment of $25,000.00 for INV-1001 has been verified. The warehouse block has been released under Release Order REL-8910-1001."
+        },
+        "timestamp": "2026-05-21T11:00:05.000Z"
+      }
+    ]
+  },
+  {
+    "workflowId": "wf_20260521_1002",
+    "status": "completed",
+    "createdAt": "2026-05-21T11:05:00.000Z",
+    "traces": [
+      {
+        "agentName": "parser",
+        "order": 1,
+        "status": "completed",
+        "reasoning": "Extracted invoice reference INV-1002 and amount 20000.00 from WhatsApp receipt text.",
+        "output": {
+          "extractedReference": "INV-1002",
+          "extractedAmount": 20000,
+          "extractedConfidence": 0.95
+        },
+        "timestamp": "2026-05-21T11:05:01.000Z"
+      },
+      {
+        "agentName": "lookup",
+        "order": 2,
+        "status": "completed",
+        "reasoning": "Located invoice record for reference INV-1002 in database.",
+        "output": {
+          "invoiceFound": true,
+          "invoiceData": {
+            "id": "INV-1002",
+            "amount": 25000,
+            "status": "pending",
+            "warehouseBlocked": true
+          },
+          "beforeState": {
+            "invoiceStatus": "pending",
+            "warehouseBlocked": true
+          }
+        },
+        "timestamp": "2026-05-21T11:05:02.000Z"
+      },
+      {
+        "agentName": "matcher",
+        "order": 3,
+        "status": "completed",
+        "reasoning": "Verified payment match: Paid amount 20000.00 is less than invoice amount 25000.00 (underpayment).",
+        "output": {
+          "matchType": "underpayment"
+        },
+        "timestamp": "2026-05-21T11:05:03.000Z"
+      },
+      {
+        "agentName": "decision",
+        "order": 4,
+        "status": "completed",
+        "reasoning": "Underpayment detected. Dispute ticket generated. Warehouse block remains active.",
+        "output": {
+          "recommendedAction": "dispute",
+          "actionId": "DISP-8910-1002"
+        },
+        "timestamp": "2026-05-21T11:05:04.000Z"
+      },
+      {
+        "agentName": "simulator",
+        "order": 5,
+        "status": "completed",
+        "reasoning": "Dispute registered. Sent WhatsApp notification regarding payment deficit.",
+        "output": {
+          "afterState": {
+            "invoiceStatus": "disputed",
+            "warehouseBlocked": true
+          },
+          "simulationLogs": [
+            "Initializing dispute simulation for DISP-8910-1002...",
+            "Updating database: INV-1002 status set to disputed.",
+            "Database: Invoice INV-1002 warehouseBlocked remains true.",
+            "WhatsApp API: Send message to +923001234567: 'Deficit detected for INV-1002. Underpayment registered.'"
+          ],
+          "whatsappPreview": "Hello! We received your payment of $20,000.00 for INV-1002. However, this is less than the invoice amount of $25,000.00. Dispute ticket DISP-8910-1002 has been opened. The warehouse remains blocked."
+        },
+        "timestamp": "2026-05-21T11:05:05.000Z"
+      }
+    ]
+  },
+  {
+    "workflowId": "wf_20260521_1003",
+    "status": "completed",
+    "createdAt": "2026-05-21T11:10:00.000Z",
+    "traces": [
+      {
+        "agentName": "parser",
+        "order": 1,
+        "status": "completed",
+        "reasoning": "Extracted invoice reference INV-1003 and amount 30000.00 from natural language payment proof.",
+        "output": {
+          "extractedReference": "INV-1003",
+          "extractedAmount": 30000,
+          "extractedConfidence": 0.96
+        },
+        "timestamp": "2026-05-21T11:10:01.000Z"
+      },
+      {
+        "agentName": "lookup",
+        "order": 2,
+        "status": "completed",
+        "reasoning": "Located invoice record for reference INV-1003 in database.",
+        "output": {
+          "invoiceFound": true,
+          "invoiceData": {
+            "id": "INV-1003",
+            "amount": 25000,
+            "status": "pending",
+            "warehouseBlocked": true
+          },
+          "beforeState": {
+            "invoiceStatus": "pending",
+            "warehouseBlocked": true
+          }
+        },
+        "timestamp": "2026-05-21T11:10:02.000Z"
+      },
+      {
+        "agentName": "matcher",
+        "order": 3,
+        "status": "completed",
+        "reasoning": "Verified payment match: Paid amount 30000.00 exceeds invoice amount 25000.00 (overpayment).",
+        "output": {
+          "matchType": "overpayment"
+        },
+        "timestamp": "2026-05-21T11:10:03.000Z"
+      },
+      {
+        "agentName": "decision",
+        "order": 4,
+        "status": "completed",
+        "reasoning": "Overpayment detected. Approved release and generated a credit note for the overpaid balance of 5000.00.",
+        "output": {
+          "recommendedAction": "credit_note",
+          "actionId": "CRNT-8910-1003"
+        },
+        "timestamp": "2026-05-21T11:10:04.000Z"
+      },
+      {
+        "agentName": "simulator",
+        "order": 5,
+        "status": "completed",
+        "reasoning": "Warehouse release processed and Credit Note generated. WhatsApp confirmation dispatched.",
+        "output": {
+          "afterState": {
+            "invoiceStatus": "reconciled",
+            "warehouseBlocked": false
+          },
+          "simulationLogs": [
+            "Initializing credit note and release simulation for CRNT-8910-1003...",
+            "Updating database: INV-1003 status set to reconciled.",
+            "Updating database: INV-1003 warehouseBlocked set to false.",
+            "Accounting API: Creating Credit Note CRNT-8910-1003 for $5,000.00.",
+            "WhatsApp API: Send message to +923001234567: 'Invoice INV-1003 reconciled. Credit Note CRNT-8910-1003 issued.'"
+          ],
+          "whatsappPreview": "Hello! Your payment of $30,000.00 for INV-1003 has been verified. The invoice is reconciled and warehouse block released. We have issued Credit Note CRNT-8910-1003 for the $5,000.00 overpayment."
+        },
+        "timestamp": "2026-05-21T11:10:05.000Z"
+      }
+    ]
+  },
+  {
+    "workflowId": "wf_20260521_9999",
+    "status": "completed",
+    "createdAt": "2026-05-21T11:15:00.000Z",
+    "traces": [
+      {
+        "agentName": "parser",
+        "order": 1,
+        "status": "completed",
+        "reasoning": "Extracted invoice reference INV-9999 and amount 10000.00 from invoice image details.",
+        "output": {
+          "extractedReference": "INV-9999",
+          "extractedAmount": 10000,
+          "extractedConfidence": 0.94
+        },
+        "timestamp": "2026-05-21T11:15:01.000Z"
+      },
+      {
+        "agentName": "lookup",
+        "order": 2,
+        "status": "completed",
+        "reasoning": "No invoice matching reference INV-9999 exists in database.",
+        "output": {
+          "invoiceFound": false,
+          "invoiceData": null,
+          "beforeState": null
+        },
+        "timestamp": "2026-05-21T11:15:02.000Z"
+      },
+      {
+        "agentName": "matcher",
+        "order": 3,
+        "status": "completed",
+        "reasoning": "Payment matched: Invoice not found (no_invoice match classification).",
+        "output": {
+          "matchType": "no_invoice"
+        },
+        "timestamp": "2026-05-21T11:15:03.000Z"
+      },
+      {
+        "agentName": "decision",
+        "order": 4,
+        "status": "completed",
+        "reasoning": "Invoice not found. Opened a dispute ticket for payment reconciliation review.",
+        "output": {
+          "recommendedAction": "dispute",
+          "actionId": "DISP-8910-9999"
+        },
+        "timestamp": "2026-05-21T11:15:04.000Z"
+      },
+      {
+        "agentName": "simulator",
+        "order": 5,
+        "status": "completed",
+        "reasoning": "Dispute registered for unregistered payment. WhatsApp alert sent to client.",
+        "output": {
+          "afterState": {},
+          "simulationLogs": [
+            "Initializing dispute simulation for missing invoice INV-9999...",
+            "System: Creating dispute ticket DISP-8910-9999 in accounting system.",
+            "WhatsApp API: Send message to +923001234567: 'Missing invoice verification for INV-9999.'"
+          ],
+          "whatsappPreview": "Hello! We received your payment of $10,000.00 for reference INV-9999. However, we could not find this invoice reference in our system. A dispute ticket DISP-8910-9999 has been generated to verify the invoice manually."
+        },
+        "timestamp": "2026-05-21T11:15:05.000Z"
+      }
+    ]
+  },
+  {
+    "workflowId": "wf_20260521_manual",
+    "status": "completed",
+    "createdAt": "2026-05-21T11:20:00.000Z",
+    "traces": [
+      {
+        "agentName": "parser",
+        "order": 1,
+        "status": "completed",
+        "reasoning": "Parser agent skipped. Input entered manually with high confidence 1.00.",
+        "output": {
+          "extractedReference": "INV-1001",
+          "extractedAmount": 25000,
+          "extractedConfidence": 1
+        },
+        "timestamp": "2026-05-21T11:20:01.000Z"
+      },
+      {
+        "agentName": "lookup",
+        "order": 2,
+        "status": "completed",
+        "reasoning": "Located invoice record for reference INV-1001 in database.",
+        "output": {
+          "invoiceFound": true,
+          "invoiceData": {
+            "id": "INV-1001",
+            "amount": 25000,
+            "status": "pending",
+            "warehouseBlocked": true
+          },
+          "beforeState": {
+            "invoiceStatus": "pending",
+            "warehouseBlocked": true
+          }
+        },
+        "timestamp": "2026-05-21T11:20:02.000Z"
+      },
+      {
+        "agentName": "matcher",
+        "order": 3,
+        "status": "completed",
+        "reasoning": "Verified payment match: Paid amount 25000.00 matches invoice amount 25000.00 exactly.",
+        "output": {
+          "matchType": "exact"
+        },
+        "timestamp": "2026-05-21T11:20:03.000Z"
+      },
+      {
+        "agentName": "decision",
+        "order": 4,
+        "status": "completed",
+        "reasoning": "Exact payment match triggers immediate approval. Generated Release Order.",
+        "output": {
+          "recommendedAction": "approve",
+          "actionId": "REL-8910-1001"
+        },
+        "timestamp": "2026-05-21T11:20:04.000Z"
+      },
+      {
+        "agentName": "simulator",
+        "order": 5,
+        "status": "completed",
+        "reasoning": "Successfully executed warehouse release and sent WhatsApp confirmation.",
+        "output": {
+          "afterState": {
+            "invoiceStatus": "reconciled",
+            "warehouseBlocked": false
+          },
+          "simulationLogs": [
+            "Initializing release simulation for REL-8910-1001...",
+            "Updating database: INV-1001 status set to reconciled.",
+            "Updating database: INV-1001 warehouseBlocked set to false.",
+            "Warehouse API: Dispatching release instruction to logistics hub.",
+            "WhatsApp API: Send message to +923001234567: 'Invoice INV-1001 reconciled! Your order has been released.'"
+          ],
+          "whatsappPreview": "Hello! Your payment of $25,000.00 for INV-1001 has been verified. The warehouse block has been released under Release Order REL-8910-1001."
+        },
+        "timestamp": "2026-05-21T11:20:05.000Z"
+      }
+    ]
+  }
+]

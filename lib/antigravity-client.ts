@@ -21,6 +21,96 @@ async function updateWorkflowStatus(workflowId: string, updateData: any) {
 }
 
 export class AntigravityClient {
+  // Start workflow: create execution doc and return workflowId
+  async startWorkflow(input: any) {
+    const workflowId = generateId('wf');
+    const initialDoc = {
+      id: workflowId,
+      inputType: input.inputType,
+      inputPreview: input.text?.slice(0, 100) || input.manual?.invoiceId || 'Image input',
+      status: 'running',
+      currentStep: 1,
+      createdAt: new Date(),
+    };
+    await db.collection('workflow_executions').doc(workflowId).set(initialDoc);
+    // Do NOT start pipeline here; caller should trigger it (e.g., via Vercel waitUntil)
+    return workflowId;
+  }
+
+  // Public method to run the full pipeline; can be awaited in background
+  async runPipeline(workflowId: string, input: any) {
+    try {
+      const ctx: WorkflowContext = {
+        workflowId,
+        inputType: input.inputType || 'image',
+        input: {
+          invoiceId: input.manual?.invoiceId,
+          amount: input.manual?.amount,
+          imageBase64: input.imageBase64,
+          mimeType: input.mimeType,
+          text: input.text,
+          skipParser: input.skipParser || (input.inputType === 'manual')
+        }
+      };
+
+      const agents = [
+        new ParserAgent(),
+        new LookupAgent(),
+        new MatcherAgent(),
+        new DecisionAgent(),
+        new SimulatorAgent()
+      ];
+
+      for (let i = 0; i < agents.length; i++) {
+        const agent = agents[i];
+        const order = i + 1;
+        await writeTrace(workflowId, { agentName: agent.name, order, status: 'running' });
+        const result = await agent.run(ctx);
+        if (result.status === 'failed') {
+          await writeTrace(workflowId, { agentName: agent.name, order, status: 'failed', reasoning: result.reasoning, output: result.output });
+          await updateWorkflowStatus(workflowId, { status: 'failed', error: result.reasoning });
+          return;
+        }
+        // Merge outputs (same logic as before)
+        if (agent.name === 'parser') {
+          ctx.extracted = { invoiceId: result.output.extractedReference as string, amount: result.output.extractedAmount as number, confidence: result.output.extractedConfidence as number };
+          await updateWorkflowStatus(workflowId, { ...result.output, currentStep: order + 1 });
+        } else if (agent.name === 'lookup') {
+          ctx.lookup = { found: result.output.invoiceFound as boolean, invoice: result.output.invoiceData as any, beforeState: result.output.beforeState as any };
+          await updateWorkflowStatus(workflowId, { ...result.output, currentStep: order + 1 });
+        } else if (agent.name === 'matcher') {
+          ctx.match = { type: result.output.matchType as any, reasoning: result.reasoning };
+          await updateWorkflowStatus(workflowId, { ...result.output, currentStep: order + 1 });
+        } else if (agent.name === 'decision') {
+          ctx.decision = { action: result.output.recommendedAction as any, actionId: result.output.actionId as string, reasoning: result.reasoning };
+          await updateWorkflowStatus(workflowId, { ...result.output, currentStep: order + 1 });
+        } else if (agent.name === 'simulator') {
+          ctx.result = {
+            finalStatus: 'completed',
+            banner: ctx.decision?.action === 'approve' ? 'approved' : (ctx.decision?.action === 'dispute' ? 'dispute' : 'credit_note'),
+            afterState: result.output.afterState as any,
+            simulationLogs: result.output.simulationLogs as string[],
+            whatsappPreview: result.output.whatsappPreview as string,
+          };
+          await updateWorkflowStatus(workflowId, {
+            afterState: ctx.result.afterState,
+            simulationLogs: ctx.result.simulationLogs,
+            whatsappPreview: ctx.result.whatsappPreview,
+            banner: ctx.result.banner,
+            status: 'completed',
+            currentStep: order
+          });
+        }
+        await writeTrace(workflowId, { agentName: agent.name, order, status: 'completed', reasoning: result.reasoning, output: result.output });
+      }
+    } catch (e: any) {
+      console.error(e);
+      await updateWorkflowStatus(workflowId, { status: 'failed', error: e.message });
+    }
+  }
+
+  // Existing private runPipeline removed; public version above is used instead
+
   async startWorkflow(input: any) {
     const workflowId = generateId('wf');
     

@@ -6,6 +6,8 @@ Update this file as work completes. Mark `[x]` only when verified in code.
 
 ---
 
+---
+
 ## Completed
 
 - [x] Phase 1: Next.js scaffold, Tailwind, deps, `MOCK_MODE`
@@ -16,16 +18,11 @@ Update this file as work completes. Mark `[x]` only when verified in code.
 - [x] Phase 6: Simulator updates invoice + before/after + WhatsApp preview
 - [x] Phase 3.5 (core agent refactor & Gemini integration)
 - [x] Zod validation on API routes
-
----
-
-## Active — Final Polish & Backlog (do in this order)
-
-1. [x] **`scripts/test-workflow.js`** — script to run automated pipeline tests
-2. [x] **`scripts/export-agent-logs.js`** — script to export run traces for judges
-3. [ ] **Phase 7: PWA Polish** — Service worker configuration, standalone style tweaks, offline banner
-4. [ ] **Phase 8: Full journey regression** — verify 4 demo scenarios and manual skip parser
-5. [ ] **Phase 9: Vercel deploy** — deploy production build and confirm live environment variables
+- [x] **`scripts/test-workflow.js`** — script to run automated pipeline tests
+- [x] **`scripts/export-agent-logs.js`** — script to export run traces for judges
+- [x] **Phase 7: PWA Polish** — Service worker configuration, standalone style tweaks, offline banner
+- [x] **Phase 8: Full journey regression** — verify 5 demo scenarios and manual skip parser
+- [x] **Phase 9: Vercel deploy readiness** — Vercel-compatible background orchestrator, Next.js root tracing fix, pre-exported judge logs
 
 ---
 

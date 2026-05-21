@@ -2,7 +2,7 @@
 import { TopBar } from '@/components/TopBar';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CheckCircle2, Loader2, Sparkles } from 'lucide-react';
+import { CheckCircle2, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 import useSWR from 'swr';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -12,7 +12,7 @@ function ProcessContent() {
   const searchParams = useSearchParams();
   const workflowId = searchParams.get('workflowId');
 
-  const { data, error } = useSWR(
+  const { data, error, mutate } = useSWR(
     workflowId ? `/api/workflow/${workflowId}/status` : null, 
     fetcher, 
     { refreshInterval: 1000 }
@@ -27,7 +27,24 @@ function ProcessContent() {
   }, [data, router, workflowId]);
 
   if (!workflowId) return <div className="p-4 pt-[70px] text-center text-white/50 text-[13px]">No workflow ID provided</div>;
-  if (error) return <div className="p-4 pt-[70px] text-center text-danger text-[13px]">Error loading workflow status</div>;
+  
+  if (error) {
+    return (
+      <div className="p-6 pt-[50px] text-center">
+        <div className="bg-danger/10 border border-danger/25 rounded-2xl p-6 mb-4">
+          <AlertTriangle className="mx-auto text-danger mb-2.5" size={28} />
+          <p className="text-[14px] font-bold mb-1 text-white">Connection Issue</p>
+          <p className="text-[11px] text-white/50 mb-4 leading-relaxed">Failed to fetch the current processing status. Please check your connection.</p>
+          <button 
+            onClick={() => mutate()} 
+            className="w-full p-2.5 bg-primary text-white text-[13px] font-semibold rounded-xl hover:opacity-90 transition-opacity"
+          >
+            Retry Connection
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const currentStep = data?.currentStep || 1;
   const agents = data?.agents || [];
@@ -68,7 +85,7 @@ function ProcessContent() {
         {/* Glow effect */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-[40px] rounded-full pointer-events-none"></div>
 
-        <div className="relative border-l-2 border-white/10 ml-3 space-y-[22px] py-1">
+        <div role="status" aria-live="polite" className="relative border-l-2 border-white/10 ml-3 space-y-[22px] py-1">
           {steps.map((step) => {
             const agentData = agents.find((a: any) => a.order === step.num);
             const status = agentData?.status || (currentStep > step.num ? 'completed' : currentStep === step.num ? 'running' : 'pending');

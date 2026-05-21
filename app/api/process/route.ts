@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { waitUntil } from '@vercel/functions';
 import { antigravityClient } from '@/lib/antigravity-client';
 import { z } from 'zod';
 
@@ -64,7 +65,8 @@ export async function POST(request: NextRequest) {
     }
 
     const workflowId = await antigravityClient.startWorkflow(parsed.data);
-
+    // Trigger pipeline in background using Vercel's waitUntil
+    waitUntil(antigravityClient.runPipeline(workflowId, parsed.data));
     return NextResponse.json({ workflowId, status: 'running' }, { status: 201 });
   } catch (error: any) {
     console.error('Process error:', error);
