@@ -4,8 +4,8 @@
   "description": "Turn any payment proof into an instant warehouse release order.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#090A17",
+  "theme_color": "#090A17",
   "icons": [
     {
       "src": "/next.svg",
