@@ -38,6 +38,8 @@ YAML under `antigravity/` documents the same pipeline for hackathon submission; 
 
 Seed invoices: [mock-data/invoices.json](mock-data/invoices.json) — INV-1001 (exact match), INV-1002 (underpay), INV-1003 (overpay), etc.
 
+**Hackathon demo video (≈2:30):** [docs/DEMO-VIDEO.md](docs/DEMO-VIDEO.md) · receipt asset: [demo/receipt-inv1001.svg](demo/receipt-inv1001.svg)
+
 ## Deploy
 
 Vercel + Firebase Firestore. Set env vars from [TRD.md](TRD.md). Use `MOCK_MODE=true` on preview if credentials are missing.
