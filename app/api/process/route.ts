@@ -65,8 +65,21 @@ export async function POST(request: NextRequest) {
     }
 
     const workflowId = await antigravityClient.startWorkflow(parsed.data);
-    // Trigger pipeline in background using Vercel's waitUntil
-    waitUntil(antigravityClient.runPipeline(workflowId, parsed.data));
+    
+    // Trigger pipeline in background. On Vercel, we must use waitUntil to prevent lambda freeze.
+    // Locally in dev mode, we trigger it as a standard background promise.
+    const pipelinePromise = antigravityClient.runPipeline(workflowId, parsed.data);
+    if (process.env.VERCEL) {
+      try {
+        waitUntil(pipelinePromise);
+      } catch (err) {
+        console.warn('Vercel waitUntil failed, falling back to local promise execution:', err);
+        pipelinePromise.catch(console.error);
+      }
+    } else {
+      pipelinePromise.catch(console.error);
+    }
+    
     return NextResponse.json({ workflowId, status: 'running' }, { status: 201 });
   } catch (error: any) {
     console.error('Process error:', error);
